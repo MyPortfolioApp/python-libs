@@ -38,7 +38,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["mylibraries"]
+known-first-party = ["mylogger", "example_lib"]
 
 [tool.mypy]
 python_version = "3.12"

@@ -116,5 +116,5 @@ pip install -e /path/to/python-libs/packages/logger
 ### From git (once pushed to a remote)
 
 ```bash
-pip install git+https://github.com/carlogasparini/python-libs.git#subdirectory=packages/logger
+pip install git+https://github.com/MyPortfolioApp/python-libs.git#subdirectory=packages/logger
 ```

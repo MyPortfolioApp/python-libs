@@ -9,7 +9,7 @@ pip install -e /Users/carlogasparini/Projects/python-libs/packages/logger
 ## Da Git (dopo aver pushato)
 
 ```bash
-pip install git+https://github.com/carlogasparini/python-libs.git#subdirectory=packages/logger
+pip install git+https://github.com/MyPortfolioApp/python-libs.git#subdirectory=packages/logger
 ```
 
 ## Uso
