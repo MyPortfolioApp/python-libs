@@ -18,7 +18,7 @@ from mylogger import (
     log_success,
     unbind_context,
 )
-from mylogger.core import _configured, _debug_mode
+from mylogger.core import _configured, _log_format
 
 
 @pytest.fixture(autouse=True)
@@ -27,7 +27,7 @@ def reset_logger() -> None:
     import mylogger.core as core
 
     core._configured = False
-    core._debug_mode = None
+    core._log_format = None
     clear_context()
 
 
@@ -37,16 +37,16 @@ def test_get_logger_returns_bound_logger() -> None:
     assert log is not None
 
 
-def test_configure_debug_mode() -> None:
-    """Test configuration in debug mode."""
-    configure(debug=True)
+def test_configure_console_mode() -> None:
+    """Test configuration in console mode."""
+    configure(format="console")
     # Should not raise
     log_info("test message")
 
 
-def test_configure_production_mode(capsys: pytest.CaptureFixture[str]) -> None:
-    """Test configuration in production mode outputs JSON."""
-    configure(debug=False)
+def test_configure_json_mode(capsys: pytest.CaptureFixture[str]) -> None:
+    """Test configuration in json mode outputs JSON."""
+    configure(format="json")
     log_info("test message")
 
     captured = capsys.readouterr()
@@ -58,7 +58,7 @@ def test_configure_production_mode(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_log_success_adds_status(capsys: pytest.CaptureFixture[str]) -> None:
     """Test log_success adds status field."""
-    configure(debug=False)
+    configure(format="json")
     log_success("operation completed")
 
     captured = capsys.readouterr()
@@ -68,7 +68,7 @@ def test_log_success_adds_status(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_log_start_adds_phase(capsys: pytest.CaptureFixture[str]) -> None:
     """Test log_start adds phase field."""
-    configure(debug=False)
+    configure(format="json")
     log_start("starting process")
 
     captured = capsys.readouterr()
@@ -78,7 +78,7 @@ def test_log_start_adds_phase(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_log_db_adds_component(capsys: pytest.CaptureFixture[str]) -> None:
     """Test log_db adds component field."""
-    configure(debug=False)
+    configure(format="json")
     log_db("query executed")
 
     captured = capsys.readouterr()
@@ -88,7 +88,7 @@ def test_log_db_adds_component(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_log_error_level(capsys: pytest.CaptureFixture[str]) -> None:
     """Test log_error uses error level."""
-    configure(debug=False)
+    configure(format="json")
     log_error("something failed")
 
     captured = capsys.readouterr()
@@ -98,7 +98,7 @@ def test_log_error_level(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_extra_kwargs_passed(capsys: pytest.CaptureFixture[str]) -> None:
     """Test that extra kwargs are included in output."""
-    configure(debug=False)
+    configure(format="json")
     log_info("user action", user_id=123, action="login")
 
     captured = capsys.readouterr()
@@ -109,7 +109,7 @@ def test_extra_kwargs_passed(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_bind_context(capsys: pytest.CaptureFixture[str]) -> None:
     """Test context binding persists across log calls."""
-    configure(debug=False)
+    configure(format="json")
     bind_context(request_id="abc-123")
 
     log_info("first message")
@@ -126,7 +126,7 @@ def test_bind_context(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_unbind_context(capsys: pytest.CaptureFixture[str]) -> None:
     """Test unbind removes specific context."""
-    configure(debug=False)
+    configure(format="json")
     bind_context(request_id="abc-123", user_id=456)
     unbind_context("user_id")
 
@@ -140,7 +140,7 @@ def test_unbind_context(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_clear_context(capsys: pytest.CaptureFixture[str]) -> None:
     """Test clear removes all context."""
-    configure(debug=False)
+    configure(format="json")
     bind_context(request_id="abc-123", user_id=456)
     clear_context()
 
@@ -152,14 +152,14 @@ def test_clear_context(capsys: pytest.CaptureFixture[str]) -> None:
     assert "user_id" not in output
 
 
-def test_debug_env_variable() -> None:
-    """Test DEBUG environment variable is respected."""
+def test_format_env_variable() -> None:
+    """Test MYLOGGER_FORMAT environment variable is respected."""
     import mylogger.core as core
 
-    with patch.dict("os.environ", {"DEBUG": "false"}):
-        core._debug_mode = None
-        assert core._get_debug_mode() is False
+    with patch.dict("os.environ", {"MYLOGGER_FORMAT": "json"}):
+        core._log_format = None
+        assert core._get_format() == "json"
 
-    with patch.dict("os.environ", {"DEBUG": "true"}):
-        core._debug_mode = None
-        assert core._get_debug_mode() is True
+    with patch.dict("os.environ", {"MYLOGGER_FORMAT": "console"}):
+        core._log_format = None
+        assert core._get_format() == "console"

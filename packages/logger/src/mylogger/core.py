@@ -1,7 +1,9 @@
 """
 Structured logger with hybrid output:
-- Dev (debug=True): Colored readable output in terminal
-- Prod (debug=False): Structured JSON for log aggregation
+- console (default): Colored readable output in terminal
+- json: Structured JSON for log aggregation
+
+Controlled via MYLOGGER_FORMAT env var or configure(format=...).
 """
 
 import os
@@ -10,31 +12,31 @@ from typing import Any
 import structlog
 from structlog.typing import Processor
 
-# Global debug mode flag
-_debug_mode: bool | None = None
+# Global log format setting
+_log_format: str | None = None
 _configured: bool = False
 
 
-def _get_debug_mode() -> bool:
-    """Get debug mode from environment or configuration."""
-    global _debug_mode
-    if _debug_mode is not None:
-        return _debug_mode
-    # Default: check DEBUG environment variable
-    return os.environ.get("DEBUG", "true").lower() in ("true", "1", "yes")
+def _get_format() -> str:
+    """Get log format from environment or configuration."""
+    global _log_format
+    if _log_format is not None:
+        return _log_format
+    # Default: check MYLOGGER_FORMAT environment variable
+    return os.environ.get("MYLOGGER_FORMAT", "console").lower()
 
 
-def configure(debug: bool | None = None) -> None:
+def configure(format: str | None = None) -> None:
     """
     Configure structlog based on environment.
 
     Args:
-        debug: Force debug mode. If None, uses DEBUG env var.
+        format: Log format ("console" or "json"). If None, uses MYLOGGER_FORMAT env var.
     """
-    global _debug_mode, _configured
+    global _log_format, _configured
 
-    if debug is not None:
-        _debug_mode = debug
+    if format is not None:
+        _log_format = format.lower()
 
     shared_processors: list[Processor] = [
         structlog.contextvars.merge_contextvars,
@@ -43,7 +45,7 @@ def configure(debug: bool | None = None) -> None:
         structlog.stdlib.ExtraAdder(),
     ]
 
-    if _get_debug_mode():
+    if _get_format() == "console":
         # Dev: Colored and readable output
         structlog.configure(
             processors=[

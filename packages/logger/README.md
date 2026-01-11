@@ -1,8 +1,8 @@
 # mylogger
 
 Structured logger with hybrid output:
-- **Dev** (`DEBUG=true`): Colored readable output in terminal
-- **Prod** (`DEBUG=false`): Structured JSON for log aggregation
+- **console** (default): Colored readable output in terminal
+- **json**: Structured JSON for log aggregation
 
 Built on top of [structlog](https://www.structlog.org/).
 
@@ -24,7 +24,7 @@ uv pip install -e packages/logger
 from mylogger import logger, log_info, log_error, configure
 
 # Optional: explicitly configure (auto-configures on first use)
-configure(debug=True)  # or set DEBUG env var
+configure(format="console")  # or set MYLOGGER_FORMAT env var
 
 # Use the default logger
 logger.info("Application started", version="1.0.0")
@@ -87,14 +87,14 @@ api_logger.info("Request received", endpoint="/users")
 
 ## Output Examples
 
-### Dev Mode (DEBUG=true)
+### Console Mode (MYLOGGER_FORMAT=console)
 
 ```
 2024-01-15T10:30:00.000000Z [info     ] Processing request    request_id=abc-123
 2024-01-15T10:30:01.000000Z [error    ] Something failed      error_code=500
 ```
 
-### Production Mode (DEBUG=false)
+### JSON Mode (MYLOGGER_FORMAT=json)
 
 ```json
 {"event": "Processing request", "request_id": "abc-123", "timestamp": "2024-01-15T10:30:00.000000Z", "log_level": "info"}
@@ -106,8 +106,8 @@ api_logger.info("Request received", endpoint="/users")
 ### Environment Variable
 
 ```bash
-export DEBUG=false  # Production mode (JSON output)
-export DEBUG=true   # Dev mode (colored output)
+export MYLOGGER_FORMAT=json     # Production mode (JSON output)
+export MYLOGGER_FORMAT=console  # Dev mode (colored output, default)
 ```
 
 ### Programmatic
@@ -115,9 +115,9 @@ export DEBUG=true   # Dev mode (colored output)
 ```python
 from mylogger import configure
 
-# Force debug mode
-configure(debug=True)
+# Console mode (colored)
+configure(format="console")
 
-# Force production mode
-configure(debug=False)
+# JSON mode (production)
+configure(format="json")
 ```
