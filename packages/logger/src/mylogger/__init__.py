@@ -1,7 +1,13 @@
 """
-Structured logger with hybrid output:
-- Dev (debug=True): Colored readable output in terminal
-- Prod (debug=False): Structured JSON for log aggregation
+Structured logger with hybrid output.
+
+Formats:
+- console (default): Colored readable output for development
+- json: Structured JSON for production/log aggregation
+
+Configuration via .env or environment variables:
+- MYLOGGER_FORMAT: "console" or "json"
+- MYLOGGER_EXCLUDE: comma-separated log levels to exclude (e.g., "debug,info")
 """
 
 __version__ = "0.1.0"

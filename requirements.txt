@@ -1,0 +1,9 @@
+# Development dependencies
+-e packages/logger[dev]
+-e packages/example-lib[dev]
+
+# Dev tools
+ruff
+mypy
+pytest
+pre-commit

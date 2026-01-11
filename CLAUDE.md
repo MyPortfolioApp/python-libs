@@ -54,7 +54,7 @@ packages/<package-name>/
 
 ### Current Packages
 
-- **mylogger** (`packages/logger/`): Structured logging built on structlog. Output mode controlled by `DEBUG` env var (true=colored console, false=JSON).
+- **mylogger** (`packages/logger/`): Structured logging built on structlog. Output format controlled by `MYLOGGER_FORMAT` env var (`console`=colored output, `json`=structured JSON).
 
 - **example-lib** (`packages/example-lib/`): Template for creating new packages.
 

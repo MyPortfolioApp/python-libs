@@ -12,18 +12,28 @@ pip install -e /Users/carlogasparini/Projects/python-libs/packages/logger
 pip install git+https://github.com/MyPortfolioApp/python-libs.git#subdirectory=packages/logger
 ```
 
+## Configurazione
+
+Crea un file `.env` nella root del tuo progetto:
+
+```bash
+MYLOGGER_FORMAT=console     # opzioni: console, json | default: console
+MYLOGGER_EXCLUDE=debug      # opzioni: debug, info, warning, error, critical (separati da virgola)
+```
+
+Oppure configura via codice:
+
+```python
+from mylogger import configure
+
+configure(format="json", exclude=["debug"])
+```
+
 ## Uso
 
 ```python
-from mylogger import log_info, log_error, log_success, configure
+from mylogger import log_info, log_error, log_success
 
-# Opzionale: forza modalità produzione (JSON output)
-configure(debug=False)
-
-# Oppure usa variabile d'ambiente
-# export DEBUG=false
-
-# Log semplici
 log_info("Server started", port=8000)
 log_success("User created", user_id=123)
 log_error("Connection failed", error="timeout")
@@ -67,14 +77,14 @@ async def logging_middleware(request: Request, call_next):
 
 ## Output
 
-### Dev (DEBUG=true)
+### Console (MYLOGGER_FORMAT=console, default)
 ```
 2024-01-15T10:30:00.000000Z [info     ] Server started        port=8000
 2024-01-15T10:30:01.000000Z [error    ] Connection failed     error=timeout
 ```
 
-### Prod (DEBUG=false)
+### JSON (MYLOGGER_FORMAT=json)
 ```json
-{"event": "Server started", "port": 8000, "timestamp": "2024-01-15T10:30:00.000000Z", "log_level": "info"}
-{"event": "Connection failed", "error": "timeout", "timestamp": "2024-01-15T10:30:01.000000Z", "log_level": "error"}
+{"event": "Server started", "port": 8000, "timestamp": "2024-01-15T10:30:00.000000Z", "level": "info"}
+{"event": "Connection failed", "error": "timeout", "timestamp": "2024-01-15T10:30:01.000000Z", "level": "error"}
 ```

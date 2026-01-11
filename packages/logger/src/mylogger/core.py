@@ -10,10 +10,15 @@ import os
 from typing import Any
 
 import structlog
+from dotenv import load_dotenv
 from structlog.typing import Processor
 
-# Global log format setting
+# Load .env file if present
+load_dotenv()
+
+# Global settings
 _log_format: str | None = None
+_exclude_levels: set[str] | None = None
 _configured: bool = False
 
 
@@ -26,21 +31,48 @@ def _get_format() -> str:
     return os.environ.get("MYLOGGER_FORMAT", "console").lower()
 
 
-def configure(format: str | None = None) -> None:
+def _get_exclude_levels() -> set[str]:
+    """Get excluded log levels from environment or configuration."""
+    global _exclude_levels
+    if _exclude_levels is not None:
+        return _exclude_levels
+    # Default: check MYLOGGER_EXCLUDE environment variable
+    exclude_str = os.environ.get("MYLOGGER_EXCLUDE", "")
+    if not exclude_str:
+        return set()
+    return {level.strip().lower() for level in exclude_str.split(",") if level.strip()}
+
+
+def _filter_by_level(
+    _logger: Any, _method_name: str, event_dict: dict[str, Any]
+) -> dict[str, Any]:
+    """Filter out excluded log levels."""
+    exclude = _get_exclude_levels()
+    if exclude and event_dict.get("level", "").lower() in exclude:
+        raise structlog.DropEvent
+    return event_dict
+
+
+def configure(format: str | None = None, exclude: list[str] | None = None) -> None:
     """
     Configure structlog based on environment.
 
     Args:
         format: Log format ("console" or "json"). If None, uses MYLOGGER_FORMAT env var.
+        exclude: List of log levels to exclude. If None, uses MYLOGGER_EXCLUDE env var.
     """
-    global _log_format, _configured
+    global _log_format, _exclude_levels, _configured
 
     if format is not None:
         _log_format = format.lower()
 
+    if exclude is not None:
+        _exclude_levels = {level.lower() for level in exclude}
+
     shared_processors: list[Processor] = [
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
+        _filter_by_level,
         structlog.processors.TimeStamper(fmt="iso"),
         structlog.stdlib.ExtraAdder(),
     ]

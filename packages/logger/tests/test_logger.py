@@ -1,7 +1,6 @@
 """Tests for mylogger."""
 
 import json
-from io import StringIO
 from unittest.mock import patch
 
 import pytest
@@ -18,7 +17,6 @@ from mylogger import (
     log_success,
     unbind_context,
 )
-from mylogger.core import _configured, _log_format
 
 
 @pytest.fixture(autouse=True)
@@ -28,6 +26,7 @@ def reset_logger() -> None:
 
     core._configured = False
     core._log_format = None
+    core._exclude_levels = None
     clear_context()
 
 
@@ -93,7 +92,7 @@ def test_log_error_level(capsys: pytest.CaptureFixture[str]) -> None:
 
     captured = capsys.readouterr()
     output = json.loads(captured.out.strip())
-    assert output["log_level"] == "error"
+    assert output["level"] == "error"
 
 
 def test_extra_kwargs_passed(capsys: pytest.CaptureFixture[str]) -> None:
@@ -163,3 +162,47 @@ def test_format_env_variable() -> None:
     with patch.dict("os.environ", {"MYLOGGER_FORMAT": "console"}):
         core._log_format = None
         assert core._get_format() == "console"
+
+
+def test_exclude_env_variable() -> None:
+    """Test MYLOGGER_EXCLUDE environment variable is respected."""
+    import mylogger.core as core
+
+    with patch.dict("os.environ", {"MYLOGGER_EXCLUDE": "debug,info"}):
+        core._exclude_levels = None
+        assert core._get_exclude_levels() == {"debug", "info"}
+
+    with patch.dict("os.environ", {"MYLOGGER_EXCLUDE": ""}):
+        core._exclude_levels = None
+        assert core._get_exclude_levels() == set()
+
+
+def test_exclude_filters_logs(capsys: pytest.CaptureFixture[str]) -> None:
+    """Test that excluded levels are not logged."""
+    configure(format="json", exclude=["debug"])
+    log = get_logger("test")
+
+    log.debug("should not appear")
+    log.info("should appear")
+
+    captured = capsys.readouterr()
+    lines = [line for line in captured.out.strip().split("\n") if line]
+    assert len(lines) == 1
+    output = json.loads(lines[0])
+    assert output["event"] == "should appear"
+
+
+def test_exclude_multiple_levels(capsys: pytest.CaptureFixture[str]) -> None:
+    """Test that multiple levels can be excluded."""
+    configure(format="json", exclude=["debug", "info"])
+    log = get_logger("test")
+
+    log.debug("debug - excluded")
+    log.info("info - excluded")
+    log.warning("warning - should appear")
+
+    captured = capsys.readouterr()
+    lines = [line for line in captured.out.strip().split("\n") if line]
+    assert len(lines) == 1
+    output = json.loads(lines[0])
+    assert output["event"] == "warning - should appear"

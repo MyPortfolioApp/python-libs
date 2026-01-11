@@ -28,8 +28,8 @@ python3 -m venv .venv
 # Activate it
 source .venv/bin/activate
 
-# Install dev dependencies
-pip install pytest ruff mypy pre-commit
+# Install all dependencies
+pip install -r requirements.txt
 
 # Install pre-commit hooks
 pre-commit install

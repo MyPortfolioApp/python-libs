@@ -97,17 +97,18 @@ api_logger.info("Request received", endpoint="/users")
 ### JSON Mode (MYLOGGER_FORMAT=json)
 
 ```json
-{"event": "Processing request", "request_id": "abc-123", "timestamp": "2024-01-15T10:30:00.000000Z", "log_level": "info"}
-{"event": "Something failed", "error_code": 500, "timestamp": "2024-01-15T10:30:01.000000Z", "log_level": "error"}
+{"event": "Processing request", "request_id": "abc-123", "timestamp": "2024-01-15T10:30:00.000000Z", "level": "info"}
+{"event": "Something failed", "error_code": 500, "timestamp": "2024-01-15T10:30:01.000000Z", "level": "error"}
 ```
 
 ## Configuration
 
-### Environment Variable
+### Environment Variables
 
 ```bash
-export MYLOGGER_FORMAT=json     # Production mode (JSON output)
-export MYLOGGER_FORMAT=console  # Dev mode (colored output, default)
+export MYLOGGER_FORMAT=json           # Production mode (JSON output)
+export MYLOGGER_FORMAT=console        # Dev mode (colored output, default)
+export MYLOGGER_EXCLUDE=debug,info    # Exclude specific log levels
 ```
 
 ### Programmatic
@@ -120,4 +121,7 @@ configure(format="console")
 
 # JSON mode (production)
 configure(format="json")
+
+# Exclude debug and info logs
+configure(exclude=["debug", "info"])
 ```
