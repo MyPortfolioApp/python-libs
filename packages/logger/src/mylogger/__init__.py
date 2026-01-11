@@ -10,7 +10,7 @@ Configuration via .env or environment variables:
 - MYLOGGER_EXCLUDE: comma-separated log levels to exclude (e.g., "debug,info")
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from mylogger.core import (
     bind_context,

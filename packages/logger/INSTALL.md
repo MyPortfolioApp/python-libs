@@ -6,10 +6,22 @@
 pip install -e /Users/carlogasparini/Projects/python-libs/packages/logger
 ```
 
+Aggiungi al `requirements.txt` del tuo progetto:
+
+```
+mylogger @ file:///Users/carlogasparini/Projects/python-libs/packages/logger
+```
+
 ## Da Git (dopo aver pushato)
 
 ```bash
 pip install git+https://github.com/MyPortfolioApp/python-libs.git#subdirectory=packages/logger
+```
+
+Aggiungi al `requirements.txt` del tuo progetto:
+
+```
+mylogger @ git+https://github.com/MyPortfolioApp/python-libs.git#subdirectory=packages/logger
 ```
 
 ## Configurazione
